@@ -1,0 +1,76 @@
+[
+	{
+		"key" : "phrase",
+		"replacements" :
+		[
+			"Hello there, {pleasantry}",
+			"Hey, {pleasantry}",
+			"I say, {pleasantry}",
+			"You {sense} {rating} {time}"
+		]
+	},
+	{
+		"key" : "pleasantry",
+		"replacements" : 
+		[
+			"Nice to meet you",
+			"How do you do",
+			"Nice {timeUnit}, isn't it?"
+		]
+	},
+	{
+		"key" : "sense",
+		"replacements" :
+		[
+			"smell",
+			"feel",
+			"look",
+			"taste",
+			"sound"
+		]
+	},
+	{
+		"key" : "rating",
+		"replacements" :
+		[
+			"nice",
+			"pleasant",
+			"great",
+			"superb",
+			"questionable",
+			"terrible",
+			"unusual",
+			"dodgy",
+			"{modifier} {rating}"
+		]
+	},
+	{
+		"key" : "time",
+		"replacements" :
+		[
+			"today",
+			"for this time of {timeUnit}"
+		]
+	},
+	{
+		"key" : "timeUnit",
+		"replacements" :
+		[
+			"day",
+			"month",
+			"year"
+		]
+	},
+	{
+		"key" : "modifier",
+		"replacements" :
+		[
+			"extremely",
+			"quite",
+			"rather",
+			"super",
+			"mostly",
+			"slightly"
+		]
+	}
+]
