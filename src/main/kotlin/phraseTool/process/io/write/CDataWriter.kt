@@ -14,8 +14,33 @@ class CDataWriter( val variableName: String ) : PhraseBankWriter
 
         val bytes = phraseBank.toByteArray()
 
-        bytes.forEach { fileWriter.write( Integer.toHexString( it.toInt() ) ) }
+        fileWriter.write("\n// Phrasebank data\n\n")
+        fileWriter.write("char *phraseBank =\n{\n\t")
 
+        val columnCount = 16
+        var columnIndex = 0
+
+        var first : Boolean = true
+
+        bytes.forEach()
+        {
+            byte ->
+
+            if( first ) { first = false } else { fileWriter.write(", ") }
+
+            if( columnIndex > columnCount )
+            {
+                fileWriter.write( "\n\t" )
+                columnIndex = 0
+            }
+
+            val byteString = String.format("%02X", byte )
+            fileWriter.write( "0x$byteString" )
+
+            ++columnIndex
+        }
+
+        fileWriter.write("\n};\n")
         fileWriter.close()
     }
 }

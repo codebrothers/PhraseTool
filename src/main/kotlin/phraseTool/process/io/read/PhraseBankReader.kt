@@ -5,5 +5,7 @@ import java.nio.file.Path
 
 interface PhraseBankReader
 {
+    val fileExtension : String
+
     fun read( path: Path) : PhraseBank
 }

@@ -47,12 +47,15 @@ internal fun PhraseBank.toByteArray() : ByteArray
 
             out.write( refByte )
 
-            val referencedFragment       = replacement.references[index]
-            val referencedFragmentOffset = fragmentOffsets[referencedFragment]!!
+            if( replacement.references.size > index )
+            {
+                val referencedFragment       = replacement.references[index]
+                val referencedFragmentOffset = fragmentOffsets[referencedFragment] ?: throw Exception("Fragment '${referencedFragment.key}' not properly deserialized")
 
-            out.writeAsUint16( referencedFragmentOffset )
+                out.writeAsUint16( referencedFragmentOffset )
 
-            out.write( 0 )
+                out.write( 0 )
+            }
         }
     }
 

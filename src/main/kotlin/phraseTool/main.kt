@@ -3,6 +3,7 @@ package phraseTool
 
 import phraseTool.model.PhraseBank
 import phraseTool.process.io.read.JSONPhraseBankReader
+import phraseTool.process.io.write.BinaryDataWriter
 import phraseTool.process.io.write.CDataWriter
 import java.io.File
 import java.nio.file.Paths
@@ -15,14 +16,19 @@ val refByte        = 0x1B       // Control char to use for reference
 
 fun main(args: Array<String>)
 {
+    Reflections("my.package").getSubTypesOf(MyInterface.class)
+
     val file : File = args.firstOrNull()?.run( ::File ) ?: getFileFromGUI() ?: exitProcess(0)
     if( !file.exists() ) exitProcess(1)
 
     val inputPath = Paths.get( file.toURI() )
     val phraseBank : PhraseBank = JSONPhraseBankReader().read( inputPath )
 
-    val outputPath = File("phraseBank.h").toPath()
-    CDataWriter( variableName = "phraseBank" ).write( phraseBank, outputPath )
+    val cDataOutputPath = File("phraseBank.h").toPath()
+    CDataWriter( variableName = "phraseBank" ).write( phraseBank, cDataOutputPath )
+
+    val binDataOutputPath = File("phraseBank.bin").toPath()
+    BinaryDataWriter().write( phraseBank, binDataOutputPath )
 }
 
 fun getFileFromGUI() : File?

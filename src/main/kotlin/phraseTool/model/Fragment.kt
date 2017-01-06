@@ -25,10 +25,15 @@ class Fragment private constructor ( val key : String, var replacements : Set<Re
 
         fun forRawFragment( rawFragment: RawFragment) : Fragment
         {
-            return getCached( rawFragment.key )
+            val fragment = getCached( rawFragment.key )
             {
-                key -> Fragment( key, HashSet( rawFragment.replacements.map( ::Replacement ) ) )
+                key -> Fragment( key )
             }
+
+            val replacements = rawFragment.replacements.map( ::Replacement )
+            fragment.replacements = HashSet( replacements )
+
+            return fragment
         }
 
         fun forKey( key: String ) : Fragment
