@@ -1,46 +1,21 @@
 package phraseTool.process.io.write
 
 import phraseTool.model.PhraseBank
-import phraseTool.process.toByteArray
-import java.io.File
-import java.io.FileWriter
-import java.nio.file.Path
+import phraseTool.process.io.FileTypeProvider
+import phraseTool.util.writeCDataHeader
+import java.io.ByteArrayOutputStream
+import java.io.OutputStream
 
-class CDataWriter( val variableName: String ) : PhraseBankWriter
+class CDataWriter( val variableName: String ) : PhraseBankWriter, FileTypeProvider
 {
-    override fun write(phraseBank: PhraseBank, path: Path)
+    override val fileTypeDescription : String = "C header source file"
+    override val fileExtension       : String = "h"
+
+    override fun write( phraseBank: PhraseBank, stream: OutputStream )
     {
-        val fileWriter = FileWriter( File( path.toUri() ) )
-
-        val bytes = phraseBank.toByteArray()
-
-        fileWriter.write("\n// Phrasebank data\n\n")
-        fileWriter.write("char *phraseBank =\n{\n\t")
-
-        val columnCount = 16
-        var columnIndex = 0
-
-        var first : Boolean = true
-
-        bytes.forEach()
-        {
-            byte ->
-
-            if( first ) { first = false } else { fileWriter.write(", ") }
-
-            if( columnIndex > columnCount )
-            {
-                fileWriter.write( "\n\t" )
-                columnIndex = 0
-            }
-
-            val byteString = String.format("%02X", byte )
-            fileWriter.write( "0x$byteString" )
-
-            ++columnIndex
-        }
-
-        fileWriter.write("\n};\n")
-        fileWriter.close()
+        val byteStream = ByteArrayOutputStream()
+        BinaryWriter().write( phraseBank, byteStream )
+        val bytes = byteStream.toByteArray()
+        writeCDataHeader( bytes, stream, variableName )
     }
 }

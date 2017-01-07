@@ -1,19 +1,23 @@
 package phraseTool.model
 
-import phraseTool.model.ByteSizeable
-import phraseTool.model.Fragment
-import phraseTool.refByteLength
+import phraseTool.process.io.refByteLength
 import java.util.*
 
 /**
  * Created by Chris on 04/01/2017.
  */
-class Replacement( string: String ) : ByteSizeable
+class Replacement : ByteSizeable
 {
     val text       : List<String>
     val references : List<Fragment>
 
-    init
+    constructor()
+    {
+        text       = ArrayList()
+        references = ArrayList()
+    }
+
+    constructor( string: String )
     {
         val pair = string
                 .split( "{", "}" )
