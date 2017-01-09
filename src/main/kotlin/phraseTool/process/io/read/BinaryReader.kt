@@ -18,12 +18,11 @@ class BinaryReader : PhraseBankReader, FileTypeProvider
     override fun read( stream: InputStream ): PhraseBank
     {
         var offset = 0
-        val offsetFragments : Map<Int, Fragment> = HashMap()
 
         fun readUint16() : Int
         {
             val uint16 = stream.readUint16()
-            offset += refByteLength
+            offset += 2
             return uint16
         }
 
@@ -36,40 +35,64 @@ class BinaryReader : PhraseBankReader, FileTypeProvider
 
         fun readReplacement() : Replacement
         {
-            val replacement = Replacement()
+            val replacementTexts     = ArrayList<String>()
+            val replacementFragments = ArrayList<Fragment>()
 
             val textBuilder = StringBuilder()
 
-            when( readByte() )
+            var byte : Int
+            readLoop@ do
             {
-                refByte ->
+                fun onTextCompleted()
                 {
                     val text = textBuilder.toString()
+                    replacementTexts.add(text)
                     textBuilder.setLength(0)
-                    val reference : Int = readUint16()
                 }
 
-                else ->
+                byte = readByte()
+                when (byte)
                 {
-                    textBuilder.append( refByte )
+                    refByte -> // Reference escape code
+                    {
+                        onTextCompleted()
+
+                        val reference: Int = readUint16()
+                        val fragment = Fragment.forKey(reference.toString())
+                        replacementFragments.add(fragment)
+                    }
+
+                    0 -> // Replacement terminator
+                    {
+                        onTextCompleted()
+
+                        break@readLoop
+                    }
+
+                    else -> // Text character
+                    {
+                        val char = byte.toChar()
+                        textBuilder.append(char)
+                    }
                 }
+
+                ++offset
             }
+            while( true )
 
-            ++offset
-
-            return replacement
+            return Replacement( replacementTexts, replacementFragments )
         }
 
         fun readFragment() : Fragment
         {
             val fragment = Fragment.forKey( offset.toString() )
             val replacementCount = readUint16()
-            fragment.replacements = (0..replacementCount).map{ readReplacement() }.toSet()
+            fragment.replacements = (1..replacementCount).map{ readReplacement() }.toSet()
             return fragment
         }
 
         val fragmentCount = readUint16()
-        val fragments = (0..fragmentCount).map{ readFragment() }.toSet()
+        val fragments = (1..fragmentCount).map{ readFragment() }.toSet()
 
         return PhraseBank( fragments )
     }

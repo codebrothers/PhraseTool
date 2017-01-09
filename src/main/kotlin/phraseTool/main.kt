@@ -37,34 +37,55 @@ fun main(args: Array<String>)
         if( !file.exists() ) exitProcess(1)
         val reader = readerFor( file.extension ) ?: exitProcess(1)
         val inputPath = Paths.get( file.toURI() )
+
+        println("Loading phraseBank from '$inputPath' using '${reader.javaClass.simpleName}'")
+
         return reader.read( inputPath )
     }
 
     fun savePhraseBank( phraseBank: PhraseBank )
     {
         val fileAwareWriters : Collection<FileTypeProvider> = writers.mapNotNull( { reader -> reader as? FileTypeProvider } )
-        val file : File = args.getOrNull(1)?.run( ::File ) ?: getUserSelectedFile( title = "Select output file", actionName = "Save", fileTypeProviders = fileAwareWriters ) ?: exitProcess(0)
+        val file : File = args.getOrNull(1)?.run( ::File ) ?: getUserSelectedFile( title = "Select output file", actionName = "Save", fileTypeProviders = fileAwareWriters, isSavingFile = true ) ?: exitProcess(0)
         val writer = writerFor( file.extension ) ?: exitProcess(1)
         val outputPath = Paths.get( file.toURI() )
+
+        println("Saving phraseBank to '$outputPath' using '${writer.javaClass.simpleName}'")
+
         return writer.write( phraseBank, outputPath )
     }
 
     val phraseBank = loadPhraseBank()
     savePhraseBank( phraseBank )
+
+    println("Exiting normally")
 }
 
-fun getUserSelectedFile( title: String, actionName: String, fileTypeProviders: Collection<FileTypeProvider> ) : File?
+fun getUserSelectedFile( title: String, actionName: String, fileTypeProviders: Collection<FileTypeProvider>, isSavingFile: Boolean = false ) : File?
 {
     val chooser = JFileChooser().apply()
     {
-        dialogTitle       = title
-        approveButtonText = actionName
+        dialogTitle               = title
+        dialogType                = if( isSavingFile ) { JFileChooser.SAVE_DIALOG } else { JFileChooser.OPEN_DIALOG }
+        isAcceptAllFileFilterUsed = false
     }
 
     fileTypeProviders.map     { FileNameExtensionFilter( it.fileTypeDescription, it.fileExtension ) }
                      .forEach { chooser.addChoosableFileFilter(it) }
 
-    return if( chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION ) chooser.selectedFile else null
+    if( chooser.showDialog(null, actionName) == JFileChooser.APPROVE_OPTION )
+    {
+        val chosenFile = chooser.selectedFile
+        val fileFilter = chooser.fileFilter as FileNameExtensionFilter
+
+        val filterExtension = fileFilter.extensions.first()
+        if( !chosenFile.extension.equals( filterExtension, ignoreCase = true ) )
+        {
+            return File( chosenFile.absolutePath + "." + filterExtension )
+        }
+        else { return chosenFile }
+    }
+    else { return null }
 }
 
 fun createCDataWriter() : PhraseBankWriter

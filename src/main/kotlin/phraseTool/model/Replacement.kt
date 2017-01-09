@@ -6,36 +6,38 @@ import java.util.*
 /**
  * Created by Chris on 04/01/2017.
  */
-class Replacement : ByteSizeable
+class Replacement( val text: List<String>, val references: List<Fragment> ) : ByteSizeable
 {
-    val text       : List<String>
-    val references : List<Fragment>
+    constructor( string: String ) : this( Companion.parseRaw( string ) )
 
-    constructor()
+    private constructor( pair: Pair<List<String>,List<Fragment>> ) : this( text = pair.first, references = pair.second )
+
+    companion object
     {
-        text       = ArrayList()
-        references = ArrayList()
-    }
+        fun parseRaw( string: String ) : Pair<List<String>,List<Fragment>>
+        {
+            val pair = string
+                    .split( "{", "}" )
+                    .foldIndexed( Pair( ArrayList<String>(), ArrayList<String>() ) )
+                    {
+                        i, replacement, string ->
+                        ( if ( i % 2 == 0 ) replacement.first else replacement.second ).add( string )
+                        replacement
+                    }
 
-    constructor( string: String )
-    {
-        val pair = string
-                .split( "{", "}" )
-                .foldIndexed( Pair( ArrayList<String>(), ArrayList<String>() ) )
-                {
-                    i, replacement, string ->
-                    ( if ( i % 2 == 0 ) replacement.first else replacement.second ).add( string )
-                    replacement
-                }
+            val text       = Collections.unmodifiableList( pair.first  )
+            val references = Collections.unmodifiableList( pair.second.map { Fragment.forKey( it ) } )
 
-        text       = Collections.unmodifiableList( pair.first  )
-        references = Collections.unmodifiableList( pair.second.map { Fragment.forKey( it ) } )
+            assert( text.size == (references.size + 1) )
 
-        assert( text.size == (references.size + 1) )
+            return Pair(text,references)
+        }
     }
 
     override fun byteSize() : Int
     {
-        return (references.size * refByteLength) + text.fold( 0 ) { length, text -> length + text.length }
+        assert( references.size == (text.size - 1)  )
+
+        return (references.size * refByteLength) + text.fold( 0 ) { length, text -> length + text.length } + 1
     }
 }

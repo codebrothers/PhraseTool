@@ -47,7 +47,8 @@ class Fragment private constructor ( val key : String, var replacements : Set<Re
 
     override fun byteSize() : Int
     {
-        return 2 + ( this.replacements?.fold( 0, { length, replacement -> length + replacement.byteSize() } ) ?: 0 )
+        // Start with 2 = Leading Uint16 count
+        return ( this.replacements?.fold( 2, { length, replacement -> length + replacement.byteSize() } ) ?: throw Exception("Cannot compute byte size: Replacement definition incomplete") )
     }
 }
 

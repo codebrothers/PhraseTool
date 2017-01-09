@@ -13,5 +13,5 @@ fun OutputStream.writeUint16(int: Int )
 
 fun InputStream.readUint16() : Int
 {
-    return (read() shl 8 and 0xff) + (read() and 0xff)
+    return (read() and 0xff) + ((read() and 0xff) shl 8 )
 }
