@@ -5,7 +5,7 @@ import phraseTool.model.PhraseBank
 import phraseTool.model.Replacement
 import phraseTool.process.io.FileTypeProvider
 import phraseTool.process.io.refByte
-import phraseTool.util.writeUint16
+import phraseTool.util.writeUInt16
 import java.io.OutputStream
 import java.nio.charset.Charset
 
@@ -23,23 +23,27 @@ class BinaryWriter : PhraseBankWriter, FileTypeProvider
 
         fun writeUint16( int: Int )
         {
-            stream.writeUint16( int )
+            stream.writeUInt16( int )
             offset += 2
         }
 
-        offset = 0
+        offset = 0  // Only the following write* functions should modify this offset
 
         writeUint16(fragments.size)
 
-        var predictedOffset = offset
-        var lastFragment = initialFragment
-        val predictedFragmentOffsets = otherFragments.fold( mutableMapOf( lastFragment to offset ) )
+        val predictedFragmentOffsets : Map<Fragment,Int> = run() // Predict Fragment offsets ahead of writing them
         {
-            map, fragment ->
-            predictedOffset += lastFragment.byteSize()
-            lastFragment = fragment
-            map[fragment] = predictedOffset
-            map
+            var predictedOffset = offset
+            var lastFragment    = initialFragment
+
+            otherFragments.fold( mutableMapOf( initialFragment to offset ) )
+            {
+                map, fragment ->
+                predictedOffset += lastFragment.byteSize()
+                lastFragment = fragment
+                map[fragment] = predictedOffset
+                map
+            }
         }
 
         fun writeByte( int: Int )
@@ -48,7 +52,7 @@ class BinaryWriter : PhraseBankWriter, FileTypeProvider
             ++offset
         }
 
-        fun writeRefTo( offset: Int )
+        fun writeReference( offset: Int )
         {
             writeByte( refByte )
             writeUint16( offset )
@@ -76,7 +80,7 @@ class BinaryWriter : PhraseBankWriter, FileTypeProvider
                     val referencedFragment       = replacement.references[index]
                     val referencedFragmentOffset = predictedFragmentOffsets[referencedFragment] ?: throw Exception("Fragment '${referencedFragment.key}' not properly deserialized")
 
-                    writeRefTo( referencedFragmentOffset )
+                    writeReference( referencedFragmentOffset )
                 }
             }
 

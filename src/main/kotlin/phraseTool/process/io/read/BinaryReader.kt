@@ -6,7 +6,7 @@ import phraseTool.model.Replacement
 import phraseTool.process.io.FileTypeProvider
 import phraseTool.process.io.refByte
 import phraseTool.process.io.refByteLength
-import phraseTool.util.readUint16
+import phraseTool.util.readUInt16
 import java.io.InputStream
 import java.util.*
 
@@ -17,11 +17,11 @@ class BinaryReader : PhraseBankReader, FileTypeProvider
 
     override fun read( stream: InputStream ): PhraseBank
     {
-        var offset = 0
+        var offset = 0  // Only the following read* functions should modify this offset
 
         fun readUint16() : Int
         {
-            val uint16 = stream.readUint16()
+            val uint16 = stream.readUInt16()
             offset += 2
             return uint16
         }

@@ -2,8 +2,8 @@
 package phraseTool
 
 import junit.framework.TestCase
-import phraseTool.util.readUint16
-import phraseTool.util.writeUint16
+import phraseTool.util.readUInt16
+import phraseTool.util.writeUInt16
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
@@ -16,13 +16,13 @@ class TestOutputStreams : TestCase("Stuff")
             numberIn ->
 
             val outStream = ByteArrayOutputStream()
-            outStream.writeUint16(numberIn)
+            outStream.writeUInt16(numberIn)
             val bytes = outStream.toByteArray()
 
             assertEquals( 2, bytes.size )
 
             val inStream = ByteArrayInputStream( bytes )
-            val numberOut = inStream.readUint16()
+            val numberOut = inStream.readUInt16()
 
             assertEquals( numberIn, numberOut )
         }
